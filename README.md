@@ -43,16 +43,13 @@ cc --plugin-dir .
 
 This loads the plugin for current session. You need to use `--plugin-dir` flag every time.
 
-**Option 2: Permanent Installation (symlink to ~/.claude/plugins)**
+**Option 2: Permanent Installation (recommended)**
 
 Install plugin permanently:
 
 ```bash
-# Clone the repository
-git clone https://github.com/sztwiorok/buddy-plugin.git buddy-plugin
-
-# Create permanent link
-ln -s $(pwd)/buddy-plugin ~/.claude/plugins/buddy
+# Clone directly to Claude plugins directory
+git clone https://github.com/sztwiorok/buddy-plugin.git ~/.claude/plugins/buddy
 
 # Plugin auto-loads in all sessions
 cc
