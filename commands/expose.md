@@ -33,16 +33,34 @@ lsof -i -P | grep LISTEN
 If multiple services found, ask user which to expose.
 If no service found, ask user for the port number.
 
-### 3. Create Tunnel Using Tunnel Skill
+### 3. Security Configuration (MANDATORY for HTTP)
+
+**MANDATORY:** Before creating an HTTP tunnel, you MUST ask the user about authentication using AskUserQuestionTool.
+
+DO NOT skip this step. DO NOT proceed until user has made a choice.
+
+Ask:
+- **Question:** "Do you want to protect this HTTP tunnel with authentication?"
+- **Options:**
+  1. "HTTP Basic Auth (username:password)" - Will use `-a username:password` flag
+  2. "Buddy Authentication" - Will use `--buddy` flag (requires Buddy account)
+  3. "No authentication (public access)" - Proceed without auth
+
+### 4. Create Tunnel
 
 Use the **tunnel skill** procedures to create appropriate tunnel type (HTTP/TCP/TLS).
 
-The tunnel skill contains:
-- All tunnel command options
-- Security configuration (auth, whitelist)
-- Examples for different use cases
+Apply the authentication option chosen in step 3:
+- HTTP Basic Auth: `bdy tunnel http localhost:PORT -a username:password`
+- Buddy Auth: `bdy tunnel http localhost:PORT --buddy`
+- No auth: `bdy tunnel http localhost:PORT`
 
-### 4. Display Results
+The tunnel skill contains additional options:
+- Regional endpoints
+- IP whitelisting
+- Named tunnels
+
+### 5. Display Results
 
 Show:
 - Tunnel name and type
