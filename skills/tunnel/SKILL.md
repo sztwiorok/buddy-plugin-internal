@@ -80,9 +80,14 @@ bdy tunnel http http://localhost:8080
 - `-w, --whitelist` - IP address restrictions
 - `-r, --region` - Regional endpoint (eu, us, as)
 
+If you expose HTTP ask (using the AskUserQuestionTool) user if they want to add authentication
+They can protect the tunnel with username and password or Buddy authentication.
+
 **Example with auth:**
 ```bash
-bdy tunnel http localhost:3000 -n my-api -a admin:secret
+bdy tunnel http localhost:3000 -a username:password
+bdy tunnel http localhost:3000 --buddy
+```
 ```
 
 ### TCP Tunnels
