@@ -1,6 +1,6 @@
 {
   "name": "buddy-internal-plugin",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Buddy.works internal plugin for Claude",
   "author": {
     "name": "Rafal Sztwiorok"

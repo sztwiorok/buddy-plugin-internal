@@ -86,7 +86,7 @@ Scope jest obsługiwany przez **query parameters**:
 - `project_name` - filtr po projekcie (dla scope PROJECT)
 - `environment_id` - filtr po środowisku (dla scope ENVIRONMENT)
 
-**Wzorzec:** Zobacz `TargetApi` jako referencję.
+**Wzorzec:** Zobacz `PackageApi` jako referencję.
 
 **Zaproponuj użytkownikowi tę strukturę** i pozwól mu ją zaakceptować lub podać alternatywną ścieżkę jeśli ma specyficzne wymagania.
 
@@ -101,23 +101,35 @@ Scope jest obsługiwany przez **query parameters**:
 
 **Zapytaj o pola (wszystko w jednym kroku):**
 
-1. **Pola podstawowe:**
+1. **Short Objects dla list:**
+   - **ZAWSZE zapytaj użytkownika:** "Czy dla list używamy Short Objects?"
+   - Jeśli **TAK**: `GET /resources` zwraca tablicę `Short{Resource}View`, a `GET /resources/{id}` zwraca pełny `{Resource}View`
+   - Jeśli **NIE**: wszystkie endpointy zwracają ten sam `{Resource}View`
+
+2. **Pola podstawowe:**
    - Jakie pola powinien zawierać zasób?
    - Które pola są wymagane (required)?
    - Które pola są tylko do odczytu (read-only)?
 
-2. **Short vs Full View:**
-   - **Short View** (dla list): tylko podstawowe pola identyfikujące (5-10 pól max)
-     - Typowo: `id`, `name`, `status`, `createDate`
-   - **Full View** (dla szczegółów): rozszerza Short View o wszystkie pola konfiguracyjne
+3. **Request vs Response View:**
+   - **Request View** (dla POST/PATCH): pola które klient wysyła
+   - **Response View** (dla GET): pola które API zwraca
+   - Typowe różnice:
+     - Response ma pola read-only: `id`, `url`, `html_url`, `createDate`, `updateDate`
+     - Request może mieć pola które nie są zwracane (np. `password`)
 
-3. **Walidacja:**
+4. **Standardowe pola Response (ZAWSZE dodawaj):**
+   - `url` - URL do zasobu w API (read-only), np. `/api/workspaces/{domain}/{resources}/{id}`
+   - `html_url` - URL do zasobu w serwisie WWW (read-only)
+   - **ZAWSZE zapytaj użytkownika:** "Jaki jest format html_url dla tego zasobu?" (np. `https://app.buddy.works/{workspace}/{project}/...`)
+
+5. **Walidacja (dla Request View):**
    - `@NotEmpty` - pole wymagane
    - `@Pattern` - regex
    - `@PositiveInt` - liczba dodatnia
    - `@AvailableValues` - enum-like
 
-4. **Typy pól:**
+6. **Typy pól:**
    - Proste: `String`, `Integer`, `Boolean`, `OffsetDateTime`
    - Relacje: `Short*View` (dla zagnieżdżonych obiektów)
    - Kolekcje: `Set<String>`, `Collection<*View>`
@@ -139,52 +151,23 @@ Na podstawie zebranych informacji wygeneruj plan implementacji w formacie poniż
 | Ścieżka | `/workspaces/{workspace_domain}/{resources}` |
 | Metody | GET, POST, PATCH, DELETE |
 | Scopes | {RESOURCE}_INFO, {RESOURCE}_ADD, {RESOURCE}_MANAGE |
+| Short Objects | Tak/Nie |
+| html_url | `https://app.buddy.works/{workspace}/...` |
 
 ## Internal API
 - Status: Istnieje
 - Interfejs: `{Resource}InternalApi.java`
 - Metody: `getResources()`, `getResource()`, `createResource()`, `updateResource()`, `deleteResource()`
 
-## Pliki do utworzenia
-
-**application-core** (View Models):
-- `view/{resource}/model/{Resource}View.java`
-- `view/{resource}/model/Short{Resource}View.java`
-- `view/{resource}/model/{Resource}sView.java`
-- `view/openapi/{Resource}ApiDescriptions.java`
-- `view/openapi/{Resource}ApiExamples.java`
-
-**application-server** (REST API):
-- `api/view/{resource}/rest/{Resource}Api.java`
-- `api/view/{resource}/rest/Default{Resource}Api.java`
-- `api/view/{resource}/services/{Resource}ViewService.java`
-- `api/view/{resource}/services/Default{Resource}ViewService.java`
-
-**Konfiguracja:**
-- Dodać do `RestApiConfig.java`
-
-## Struktura View
-
-### Short{Resource}View
-| Pole | Typ | Wymagane | Opis |
-|------|-----|----------|------|
-| id | String | read-only | Identyfikator |
-| name | String | tak | Nazwa |
-
-### {Resource}View (extends Short{Resource}View)
-| Pole | Typ | Wymagane | Opis |
-|------|-----|----------|------|
-| ... | ... | ... | ... |
-
 ## Endpointy
 
-| Metoda | Ścieżka | Scope | Response |
-|--------|---------|-------|----------|
-| GET | `/workspaces/{domain}/{resources}` | {RESOURCE}_INFO | 200 {Resource}sView |
-| GET | `/workspaces/{domain}/{resources}/{id}` | {RESOURCE}_INFO | 200 {Resource}View |
-| POST | `/workspaces/{domain}/{resources}` | {RESOURCE}_ADD | 201 {Resource}View |
-| PATCH | `/workspaces/{domain}/{resources}/{id}` | {RESOURCE}_MANAGE | 200 {Resource}View |
-| DELETE | `/workspaces/{domain}/{resources}/{id}` | {RESOURCE}_MANAGE | 204 No Content |
+| Metoda | Ścieżka | Scope | Request | Response |
+|--------|---------|-------|---------|----------|
+| GET | `/workspaces/{domain}/{resources}` | {RESOURCE}_INFO | - | 200 {Resource}sView (Short*) |
+| GET | `/workspaces/{domain}/{resources}/{id}` | {RESOURCE}_INFO | - | 200 {Resource}View |
+| POST | `/workspaces/{domain}/{resources}` | {RESOURCE}_ADD | {Resource}Request | 201 {Resource}View |
+| PATCH | `/workspaces/{domain}/{resources}/{id}` | {RESOURCE}_MANAGE | {Resource}Request | 200 {Resource}View |
+| DELETE | `/workspaces/{domain}/{resources}/{id}` | {RESOURCE}_MANAGE | - | 204 No Content |
 
 ## Query Parameters (dla GET list)
 | Param | Typ | Default | Opis |
@@ -193,6 +176,32 @@ Na podstawie zebranych informacji wygeneruj plan implementacji w formacie poniż
 | per_page | Integer | 20 | Ilość na stronę (max 50) |
 | scope | String | - | WORKSPACE, PROJECT, ENVIRONMENT |
 | project_name | String | - | Filtr po projekcie |
+
+## Modele danych
+
+### Request: {Resource}Request (POST/PATCH)
+| Pole | Typ | Wymagane | Walidacja | Opis |
+|------|-----|----------|-----------|------|
+| name | String | tak | @NotEmpty | Nazwa zasobu |
+| ... | ... | ... | ... | ... |
+
+### Response: Short{Resource}View (dla list - jeśli Short Objects = Tak)
+| Pole | Typ | Opis |
+|------|-----|------|
+| url | String | URL do zasobu w API |
+| html_url | String | URL do zasobu w serwisie WWW |
+| id | String | Identyfikator |
+| name | String | Nazwa |
+| ... | ... | ... |
+
+### Response: {Resource}View (dla szczegółów, extends Short jeśli Short Objects = Tak)
+| Pole | Typ | Opis |
+|------|-----|------|
+| url | String | URL do zasobu w API |
+| html_url | String | URL do zasobu w serwisie WWW |
+| id | String | Identyfikator |
+| name | String | Nazwa |
+| ... pola specyficzne ... | ... | ... |
 
 ## Referencje
 - Wzorzec: `TargetApi.java`
