@@ -121,12 +121,9 @@ Scope jest obsługiwany przez **query parameters**:
 4. **Standardowe pola Response (ZAWSZE dodawaj):**
    - `url` - URL do zasobu w API (read-only), np. `/api/workspaces/{domain}/{resources}/{id}`
    - `html_url` - URL do zasobu w serwisie WWW (read-only)
-   - **ZAWSZE zapytaj użytkownika:** "Jaki jest format html_url dla tego zasobu?" (np. `https://app.buddy.works/{workspace}/{project}/...`)
 
 5. **Walidacja (dla Request View):**
    - `@NotEmpty` - pole wymagane
-   - `@Pattern` - regex
-   - `@PositiveInt` - liczba dodatnia
    - `@AvailableValues` - enum-like
 
 6. **Typy pól:**
@@ -138,6 +135,7 @@ Scope jest obsługiwany przez **query parameters**:
 ### Krok 6: Generowanie planu
 
 Na podstawie zebranych informacji wygeneruj plan implementacji w formacie poniżej.
+**WAZNE: planie nie dajemy listy plikow, ktore trzeba stworzyc**
 
 ## Format planu
 
@@ -152,12 +150,7 @@ Na podstawie zebranych informacji wygeneruj plan implementacji w formacie poniż
 | Metody | GET, POST, PATCH, DELETE |
 | Scopes | {RESOURCE}_INFO, {RESOURCE}_ADD, {RESOURCE}_MANAGE |
 | Short Objects | Tak/Nie |
-| html_url | `https://app.buddy.works/{workspace}/...` |
 
-## Internal API
-- Status: Istnieje
-- Interfejs: `{Resource}InternalApi.java`
-- Metody: `getResources()`, `getResource()`, `createResource()`, `updateResource()`, `deleteResource()`
 
 ## Endpointy
 
@@ -174,7 +167,6 @@ Na podstawie zebranych informacji wygeneruj plan implementacji w formacie poniż
 |-------|-----|---------|------|
 | page | Integer | 1 | Numer strony |
 | per_page | Integer | 20 | Ilość na stronę (max 50) |
-| scope | String | - | WORKSPACE, PROJECT, ENVIRONMENT |
 | project_name | String | - | Filtr po projekcie |
 
 ## Modele danych
@@ -212,7 +204,6 @@ Na podstawie zebranych informacji wygeneruj plan implementacji w formacie poniż
 
 1. **Zawsze sprawdzaj istniejący kod** przed sugerowaniem rozwiązań
 2. **Używaj narzędzi Grep/Glob** do przeszukiwania repozytorium
-3. **Odwołuj się do konkretnych plików** jako przykładów
 4. **Pytaj o edge cases** - co jeśli zasób nie istnieje? co jeśli brak uprawnień?
 5. **Waliduj nazewnictwo** - czy nazwa scope'a nie koliduje z istniejącymi?
 

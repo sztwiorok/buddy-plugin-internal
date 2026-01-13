@@ -169,21 +169,6 @@ DEPLOYMENT_MANAGE("deployment:manage", null),
 | PATCH / PUT | Aktualizacja | `*_MANAGE` |
 | DELETE | Usuwanie | `*_MANAGE` |
 
-## Użycie w API
-
-```java
-// Odczyt
-@Operation(security = @SecurityRequirement(name = "oauth2", scopes = {"RESOURCE_INFO"}))
-Response getResources(...);
-
-// Tworzenie
-@Operation(security = @SecurityRequirement(name = "oauth2", scopes = {"RESOURCE_ADD"}))
-Response addResource(...);
-
-// Aktualizacja/Usuwanie
-@Operation(security = @SecurityRequirement(name = "oauth2", scopes = {"RESOURCE_MANAGE"}))
-Response updateResource(...);
-```
 
 ## Specjalne przypadki
 
