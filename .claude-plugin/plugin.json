@@ -1,20 +1,13 @@
 {
-  "name": "buddy",
-  "version": "0.1.4",
-  "description": "Claude Code integration with Buddy.works for managing sandboxes, tunnels, pipelines, and packages",
+  "name": "buddy-internal-plugin",
+  "version": "0.1.0",
+  "description": "Buddy.works internal plugin for Claude",
   "author": {
     "name": "Rafal Sztwiorok"
   },
   "keywords": [
-    "deployment",
-    "deploy",
-    "expose localhost",
-    "tunnels",
-    "buddy",
-    "ci-cd",
-    "devops",
-    "sandboxes",
-    "pipelines",
-    "packages"
+    "clickapp",
+    "tasks",
+    "review"
   ]
 }
